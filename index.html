@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>電気基礎 理解ドリルA1</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    #quiz-area, #extra-area, #result-area {
+      margin: 20px auto;
+      max-width: 600px;
+      padding: 20px;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+    }
+    #choices button, #extra-choices button {
+      display: block;
+      margin: 5px 0;
+      padding: 10px;
+      width: 100%;
+      background: #f0f0f0;
+      border: 1px solid #aaa;
+      cursor: pointer;
+      text-align: left;
+    }
+    #choices button:hover, #extra-choices button:hover {
+      background: #ddd;
+    }
+    #result-area {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>電気の基礎 理解ドリルA1</h1>
+
+  <div id="quiz-area">
+    <h2 id="progress"></h2>
+    <p id="question"></p>
+    <div id="choices"></div>
+    <p id="explanation" style="color: green;"></p>
+  </div>
+
+  <div id="extra-area" style="display:none;">
+    <h2>補習問題</h2>
+    <p id="extra-question"></p>
+    <div id="extra-choices"></div>
+    <p id="extra-explanation" style="color: #444; margin-top: 10px;"></p>
+  </div>
+
+  <div id="result-area">
+    <h2>結果</h2>
+    <p id="score"></p>
+    <button onclick="restartQuiz()">もう一度挑戦する</button>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        id: 1110,
+        question: "電気は何が流れることで発生するエネルギーですか？",
+        choices: ["光子", "中性子", "電子"],
+        answer: "電子",
+        explanation: "電流とは電子の流れ。",
+        extra: {
+          question: "金属内で電流を運ぶのは？",
+          choices: ["陽子", "自由電子", "中性子"],
+          answer: "自由電子"
+        }
+      },
+      {
+        id: 1120,
+        question: "電流の単位は何ですか？",
+        choices: ["ボルト", "アンペア", "ワット"],
+        answer: "アンペア",
+        explanation: "電流＝1秒間に流れる電気量。",
+        extra: {
+          question: "1アンペアは何を表す？",
+          choices: ["1秒間に流れる電気量", "電圧の大きさ", "抵抗値"],
+          answer: "1秒間に流れる電気量"
+        }
+      },
+      {
+        id: 1130,
+        question: "電圧の単位は何ですか？",
+        choices: ["アンペア", "オーム", "ボルト"],
+        answer: "ボルト",
+        explanation: "電圧＝電気を押し出す力（電位差）。",
+        extra: {
+          question: "電圧は何の力を示す？",
+          choices: ["流れにくさ", "押し出す力", "回路の分岐数"],
+          answer: "押し出す力"
+        }
+      },
+      {
+        id: 1140,
+        question: "抵抗の単位は何ですか？",
+        choices: ["ワット", "オーム", "ボルト"],
+        answer: "オーム",
+        explanation: "電流の流れにくさを示す単位。Ω（オーム）。",
+        extra: {
+          question: "抵抗は何を示す？",
+          choices: ["電気の流れやすさ", "電気の流れにくさ", "電力消費量"],
+          answer: "電気の流れにくさ"
+        }
+      },
+      // --- 以下4問 ---
+
+    ];
+
+    let shuffledQuestions, currentIndex, score, wrongAnswers;
+
+    function startQuiz() {
+      shuffledQuestions = questions.slice().sort(() => Math.random() - 0.5);
+      currentIndex = 0;
+      score = 0;
+      wrongAnswers = 0;
+      document.getElementById("result-area").style.display = "none";
+      nextQuestion();
+    }
+
+    function nextQuestion() {
+      document.getElementById("explanation").textContent = "";
+      if (currentIndex < shuffledQuestions.length) {
+        const q = shuffledQuestions[currentIndex];
+        document.getElementById("progress").textContent =
+          `${currentIndex + 1} / ${shuffledQuestions.length}`;
+        document.getElementById("question").textContent = q.question;
+        const choicesDiv = document.getElementById("choices");
+        choicesDiv.innerHTML = "";
+        q.choices.forEach(choice => {
+          const btn = document.createElement("button");
+          btn.textContent = choice;
+          btn.onclick = () => checkAnswer(choice, q);
+          choicesDiv.appendChild(btn);
+        });
+      } else {
+        showResult();
+      }
+    }
+
+    function checkAnswer(choice, q) {
+      if (choice === q.answer) {
+        score++;
+        document.getElementById("explanation").textContent =
+          "正解！ " + q.explanation;
+        currentIndex++;
+        setTimeout(nextQuestion, 1000);
+      } else {
+        wrongAnswers++;
+        document.getElementById("explanation").textContent = "✖ 不正解...";
+        showExtraQuestion(q);
+      }
+    }
+
+    function showExtraQuestion(q) {
+      document.getElementById("quiz-area").style.display = "none";
+      document.getElementById("extra-area").style.display = "block";
+      document.getElementById("extra-question").textContent = q.extra.question;
+      const extraChoices = document.getElementById("extra-choices");
+      extraChoices.innerHTML = "";
+      q.extra.choices.forEach(choice => {
+        const btn = document.createElement("button");
+        btn.textContent = choice;
+        btn.onclick = () => checkExtraAnswer(choice, q);
+        extraChoices.appendChild(btn);
+      });
+      document.getElementById("extra-explanation").textContent = "";
+    }
+
+    function checkExtraAnswer(choice, q) {
+      if (choice === q.extra.answer) {
+        document.getElementById("extra-area").style.display = "none";
+        document.getElementById("quiz-area").style.display = "block";
+        document.getElementById("explanation").textContent =
+          "補習正解！元の問題に戻ります。";
+        currentIndex++;
+        setTimeout(nextQuestion, 1000);
+      } else {
+        document.getElementById("extra-explanation").textContent =
+          `ヒント: ${q.explanation} もう一度考えよう！`;
+      }
+    }
+
+　　function showResult() {
+  　　document.getElementById("quiz-area").style.display = "none";
+  　　document.getElementById("extra-area").style.display = "none";
+  　　document.getElementById("result-area").style.display = "block";
+  　　const percent = Math.round((score / shuffledQuestions.length) * 100);
+  　　let resultMsg = `正解数: ${score} / ${shuffledQuestions.length} (${percent}%)`;
+
+  if (percent >= 80) {
+    resultMsg += "\n おめでとう！合格です！";
+  } else {
+    resultMsg += "\n80%以上になるまで再挑戦！";
+  }
+
+  document.getElementById("score").textContent = resultMsg;
+}
+
+    function restartQuiz() {
+      startQuiz();
+      document.getElementById("quiz-area").style.display = "block";
+    }
+
+    startQuiz();
+  </script>
+</body>
+</html>
